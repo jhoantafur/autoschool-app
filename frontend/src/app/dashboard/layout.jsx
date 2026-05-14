@@ -25,6 +25,12 @@ export default function DashboardLayout({ children }) {
             >
               Estudiantes
             </Link>
+            <Link
+              href="/dashboard/courses"
+              className="text-sm font-medium text-gray-600 hover:text-gray-900"
+            >
+              Cursos
+            </Link>
             <Button variant="outline" onClick={handleLogout}>
               Cerrar sesión
             </Button>
