@@ -7,7 +7,7 @@ from .views import (
 
 router = DefaultRouter()
 router.register(r'students', StudentViewSet, basename='student')
-# TODO: Register the other viewsets
+router.register(r'courses', CourseViewSet, basename='course')
 
 urlpatterns = [
     path('', include(router.urls)),

@@ -1,4 +1,5 @@
 from rest_framework import viewsets
+from .filters import CourseFilter
 from .models import Student, Instructor, Vehicle, Course, Enrollment, Lesson
 from .serializers import (
     StudentSerializer, InstructorSerializer, VehicleSerializer,
@@ -18,7 +19,12 @@ class VehicleViewSet(viewsets.ModelViewSet):
     pass
 
 class CourseViewSet(viewsets.ModelViewSet):
-    pass
+    queryset = Course.objects.all()
+    serializer_class = CourseSerializer
+    filterset_class = CourseFilter
+    search_fields = ('name', 'description')
+    ordering_fields = ('price', 'duration_hours', 'created_at')
+    ordering = ('-created_at',)
 class EnrollmentViewSet(viewsets.ModelViewSet):
     pass
 

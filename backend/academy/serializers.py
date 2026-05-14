@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from rest_framework import serializers
 from .models import Student, Instructor, Vehicle, Course, Enrollment, Lesson
 
@@ -19,7 +21,35 @@ class VehicleSerializer(serializers.ModelSerializer):
 class CourseSerializer(serializers.ModelSerializer):
     class Meta:
         model = Course
-        fields = '__all__'
+        fields = (
+            'id',
+            'name',
+            'description',
+            'duration_hours',
+            'price',
+            'level',
+            'is_active',
+            'created_at',
+        )
+        read_only_fields = ('id', 'created_at')
+
+    def validate_name(self, value):
+        if not value or not str(value).strip():
+            raise serializers.ValidationError('El nombre no puede estar vacío.')
+        return str(value).strip()
+
+    def validate_duration_hours(self, value):
+        if value is None or value <= 0:
+            raise serializers.ValidationError('La duración en horas debe ser mayor que 0.')
+        return value
+
+    def validate_price(self, value):
+        if value is None:
+            raise serializers.ValidationError('El precio es requerido.')
+        dec = value if isinstance(value, Decimal) else Decimal(str(value))
+        if dec < 0:
+            raise serializers.ValidationError('El precio debe ser mayor o igual a 0.')
+        return dec
 
 class EnrollmentSerializer(serializers.ModelSerializer):
     class Meta:
