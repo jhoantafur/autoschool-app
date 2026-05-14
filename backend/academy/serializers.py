@@ -3,10 +3,28 @@ from decimal import Decimal
 from rest_framework import serializers
 from .models import Student, Instructor, Vehicle, Course, Enrollment, Lesson
 
+PROFILE_PICTURE_MAX_BYTES = 2 * 1024 * 1024
+PROFILE_PICTURE_ALLOWED_TYPES = ('image/jpeg', 'image/png', 'image/webp')
+
 class StudentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Student
         fields = '__all__'
+
+class StudentPictureSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Student
+        fields = ('profile_picture',)
+
+    def validate_profile_picture(self, value):
+        if not value:
+            raise serializers.ValidationError('Se requiere un archivo de imagen.')
+        content_type = getattr(value, 'content_type', '') or ''
+        if content_type not in PROFILE_PICTURE_ALLOWED_TYPES:
+            raise serializers.ValidationError('Tipo no permitido. Use JPEG, PNG o WebP.')
+        if value.size > PROFILE_PICTURE_MAX_BYTES:
+            raise serializers.ValidationError('El archivo supera 2 MB.')
+        return value
 
 class InstructorSerializer(serializers.ModelSerializer):
     class Meta:

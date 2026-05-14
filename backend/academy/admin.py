@@ -3,7 +3,7 @@ from .models import Student, Instructor, Vehicle, Course, Enrollment, Lesson
 
 @admin.register(Student)
 class StudentAdmin(admin.ModelAdmin):
-    list_display = ('first_name', 'last_name', 'email', 'phone', 'created_at')
+    list_display = ('first_name', 'last_name', 'email', 'phone', 'profile_picture', 'created_at')
     search_fields = ('first_name', 'last_name', 'email')
 
 @admin.register(Instructor)
