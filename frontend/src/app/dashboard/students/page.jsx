@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { studentsService } from "@/services/students.service";
+import { UploadPictureModal } from "@/components/students/UploadPictureModal";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,11 +29,22 @@ const studentSchema = z.object({
   phone: z.string().min(1, "El teléfono es requerido"),
 });
 
+function profilePictureSrc(profilePicture) {
+  if (!profilePicture) return null;
+  const v = String(profilePicture);
+  if (v.startsWith("http://") || v.startsWith("https://")) return v;
+  const api = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
+  const origin = api.replace(/\/api\/?$/, "");
+  return v.startsWith("/") ? `${origin}${v}` : `${origin}/${v}`;
+}
+
 export default function StudentsPage() {
   const [students, setStudents] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [pictureModalOpen, setPictureModalOpen] = useState(false);
+  const [pictureStudent, setPictureStudent] = useState(null);
 
   const {
     register,
@@ -72,8 +84,28 @@ export default function StudentsPage() {
     }
   };
 
+  const openPictureModal = (student) => {
+    setPictureStudent(student);
+    setPictureModalOpen(true);
+  };
+
+  const closePictureModal = () => {
+    setPictureModalOpen(false);
+    setPictureStudent(null);
+  };
+
+  const handlePictureSaved = (updated) => {
+    setStudents((prev) => prev.map((s) => (s.id === updated.id ? updated : s)));
+  };
+
   return (
     <div className="space-y-6">
+      <UploadPictureModal
+        open={pictureModalOpen}
+        student={pictureStudent}
+        onClose={closePictureModal}
+        onSaved={handlePictureSaved}
+      />
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Estudiantes</h1>
         <p className="text-gray-500 mt-2">Gestiona el registro de estudiantes.</p>
@@ -156,15 +188,30 @@ export default function StudentsPage() {
                   <Table>
                     <TableHeader>
                       <TableRow>
+                        <TableHead>Foto</TableHead>
                         <TableHead>Nombre</TableHead>
                         <TableHead>Email</TableHead>
                         <TableHead>Teléfono</TableHead>
                         <TableHead>Fecha Registro</TableHead>
+                        <TableHead className="text-right">Acciones</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {students.map((student) => (
+                      {students.map((student) => {
+                        const pic = profilePictureSrc(student.profile_picture);
+                        return (
                         <TableRow key={student.id}>
+                          <TableCell className="w-16">
+                            {pic ? (
+                              <img
+                                src={pic}
+                                alt=""
+                                className="h-10 w-10 rounded-full object-cover border"
+                              />
+                            ) : (
+                              <span className="text-gray-400 text-sm">—</span>
+                            )}
+                          </TableCell>
                           <TableCell className="font-medium">
                             {student.first_name} {student.last_name}
                           </TableCell>
@@ -173,8 +220,19 @@ export default function StudentsPage() {
                           <TableCell>
                             {new Date(student.created_at).toLocaleDateString()}
                           </TableCell>
+                          <TableCell className="text-right">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => openPictureModal(student)}
+                            >
+                              Foto
+                            </Button>
+                          </TableCell>
                         </TableRow>
-                      ))}
+                        );
+                      })}
                     </TableBody>
                   </Table>
                 </div>
